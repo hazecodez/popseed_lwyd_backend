@@ -53,7 +53,8 @@ export class AdminLoginUseCase {
         name: admin.name,
         role: admin.role,
         organizationId: admin.organizationId,
-        token
+        token,
+        organization
       };
     } catch (error) {
       throw new Error(`Login failed: ${error instanceof Error ? error.message : 'Unknown error'}`);

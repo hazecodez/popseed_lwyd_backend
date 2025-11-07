@@ -42,4 +42,9 @@ export interface AdminLoginResponse {
   role: string;
   organizationId: string;
   token: string; // JWT token
+  organization: {
+    organizationId: string;
+    name: string;
+    isActive: boolean;
+  };
 }
