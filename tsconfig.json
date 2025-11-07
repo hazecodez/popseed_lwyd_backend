@@ -15,14 +15,14 @@
     "sourceMap": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@/adapters/*": ["./adapters/*"],
-      "@/domain/*": ["./domain/*"],
-      "@/infrastructure/*": ["./infrastructure/*"],
-      "@/usecases/*": ["./usecases/*"],
-      "@/shared/*": ["./shared/*"]
+      "@/*": ["src/*"],
+      "@/adapters/*": ["src/adapters/*"],
+      "@/domain/*": ["src/domain/*"],
+      "@/infrastructure/*": ["src/infrastructure/*"],
+      "@/usecases/*": ["src/usecases/*"],
+      "@/shared/*": ["src/shared/*"]
     }
   },
   "include": ["src/**/*"],
