@@ -66,7 +66,7 @@ export class TaskRepository implements ITaskRepository {
   async update(taskId: string, updates: Partial<Task>): Promise<Task | null> {
     // Remove fields that shouldn't be directly updated
     const { taskId: _, createdAt, updatedAt, statusHistory, ...updateData } = updates;
-
+    
     const updatedTask = await TaskModel.findOneAndUpdate(
       { taskId },
       { 

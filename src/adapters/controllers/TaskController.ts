@@ -888,206 +888,409 @@ export class TaskController {
   };
 
   // Add comment to task
-  addComment = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { taskId } = req.params;
-      const { comment, type } = req.body;
-      const organizationId = (req as any).admin?.organizationId || (req as any).user?.organizationId;
-      const userId = (req as any).admin?.adminId || (req as any).user?.userId;
+  // addComment = async (req: Request, res: Response): Promise<void> => {
+  //   try {
+  //     const { taskId } = req.params;
+  //     const { comment, type } = req.body;
+  //     const organizationId = (req as any).admin?.organizationId || (req as any).user?.organizationId;
+  //     const userId = (req as any).admin?.adminId || (req as any).user?.userId;
 
-      if (!organizationId || !userId) {
-        res.status(400).json({
-          success: false,
-          error: 'Authentication required'
-        });
-        return;
-      }
+  //     if (!organizationId || !userId) {
+  //       res.status(400).json({
+  //         success: false,
+  //         error: 'Authentication required'
+  //       });
+  //       return;
+  //     }
 
-      if (!comment?.trim()) {
-        res.status(400).json({
-          success: false,
-          error: 'Comment is required'
-        });
-        return;
-      }
+  //     if (!comment?.trim()) {
+  //       res.status(400).json({
+  //         success: false,
+  //         error: 'Comment is required'
+  //       });
+  //       return;
+  //     }
 
-      if (!type?.trim()) {
-        res.status(400).json({
-          success: false,
-          error: 'Comment type is required'
-        });
-        return;
-      }
+  //     if (!type?.trim()) {
+  //       res.status(400).json({
+  //         success: false,
+  //         error: 'Comment type is required'
+  //       });
+  //       return;
+  //     }
 
-      // Find task
-      const task = await this.taskRepository.findById(taskId);
-      if (!task || task.organizationId !== organizationId) {
-        res.status(404).json({
-          success: false,
-          error: 'Task not found'
-        });
-        return;
-      }
+  //     // Find task
+  //     const task = await this.taskRepository.findById(taskId);
+  //     if (!task || task.organizationId !== organizationId) {
+  //       res.status(404).json({
+  //         success: false,
+  //         error: 'Task not found'
+  //       });
+  //       return;
+  //     }
 
-      // Map comment types to allowed enum values
-      const typeMapping: { [key: string]: string } = {
-        'client_feedback': 'client_feedback',
-        'internal_feedback': 'internal_feedback',
-        'brief_rework': 'brief_rework',
-        'design_rework': 'design_rework',
-        'designer_feedback': 'designer_feedback',
-        'rework_requested': 'rework_requested',
-        'brief_submitted': 'brief_submitted',
-        'onhold': 'onhold',
-        'reactivate': 'reactivate',
-        'need_clarity': 'need_clarity',
-        'clarification': 'clarification',
-        'designer_assigned': 'designer_assigned',
-        'picked_up': 'picked_up',
-        'draft_submitted': 'draft_submitted',
-        'am_feedback': 'am_feedback',
-        'feedback_response': 'feedback_response',
-        'internal_approved': 'internal_approved',
-        'sent_to_client': 'sent_to_client',
-        'client_approved': 'client_approved',
-        'internal_review': 'internal_review',
-        'accept_feedback': 'accept_feedback',
-        'reject_feedback': 'reject_feedback',
-        'approve_rework': 'approve_rework',
-        'reject_rework': 'reject_rework'
-      };
+  //     // Map comment types to allowed enum values
+  //     const typeMapping: { [key: string]: string } = {
+  //       'client_feedback': 'client_feedback',
+  //       'internal_feedback': 'internal_feedback',
+  //       'brief_rework': 'brief_rework',
+  //       'design_rework': 'design_rework',
+  //       'designer_feedback': 'designer_feedback',
+  //       'rework_requested': 'rework_requested',
+  //       'brief_submitted': 'brief_submitted',
+  //       'onhold': 'onhold',
+  //       'reactivate': 'reactivate',
+  //       'need_clarity': 'need_clarity',
+  //       'clarification': 'clarification',
+  //       'designer_assigned': 'designer_assigned',
+  //       'picked_up': 'picked_up',
+  //       'draft_submitted': 'draft_submitted',
+  //       'am_feedback': 'am_feedback',
+  //       'feedback_response': 'feedback_response',
+  //       'internal_approved': 'internal_approved',
+  //       'sent_to_client': 'sent_to_client',
+  //       'client_approved': 'client_approved',
+  //       'internal_review': 'internal_review',
+  //       'accept_feedback': 'accept_feedback',
+  //       'reject_feedback': 'reject_feedback',
+  //       'approve_rework': 'approve_rework',
+  //       'reject_rework': 'reject_rework'
+  //     };
 
-      // Create comment activity
-      const newActivity: ActivityComment = {
-        byWho: userId,
-        comment: comment.trim(),
-        time: new Date(),
-        type: (typeMapping[type] || 'internal_feedback') as 'brief_submitted' | 'brief_rework' | 'design_rework' | 'designer_feedback' | 'client_feedback' | 'internal_feedback' | 'rework_requested'
-      };
+  //     // Create comment activity
+  //     const newActivity: ActivityComment = {
+  //       byWho: userId,
+  //       comment: comment.trim(),
+  //       time: new Date(),
+  //       type: (typeMapping[type] || 'internal_feedback') as 'brief_submitted' | 'brief_rework' | 'design_rework' | 'designer_feedback' | 'client_feedback' | 'internal_feedback' | 'rework_requested'
+  //     };
 
-      // Determine if status should be updated based on comment type
-      let statusUpdate: any = {
-        activityAndComments: [...(task.activityAndComments || []), newActivity],
-        updatedAt: new Date()
-      };
+  //     // Determine if status should be updated based on comment type
+  //     let statusUpdate: any = {
+  //       activityAndComments: [...(task.activityAndComments || []), newActivity],
+  //       updatedAt: new Date()
+  //     };
 
-      // Update task status based on comment type (some comments only add activity, don't change status)
-      if (type === 'brief_rework') {
-        statusUpdate.status = 'brief_rework';
-      } else if (type === 'client_feedback') {
-        statusUpdate.status = 'client_feedback';
-      } else if (type === 'internal_feedback') {
-        statusUpdate.status = 'internal_feedback';
-      } else if (type === 'onhold') {
-        statusUpdate.status = 'onhold';
-      } else if (type === 'reactivate') {
-        // Conditional reactivate: If task has assigned designer, go to designer_assigned, else go to brief_submitted
-        if (task.assignedDesigner) {
-          statusUpdate.status = 'designer_assigned'; // Designer can pick up again
-        } else {
-          statusUpdate.status = 'brief_submitted'; // Head/Lead can assign
-        }
-      } else if (type === 'brief_submitted') {
-        statusUpdate.status = 'brief_submitted';
-      } else if (type === 'picked_up') {
-        statusUpdate.status = 'picked_up';
-      } else if (type === 'draft_submitted') {
-        statusUpdate.status = 'draft_submitted';
-      } else if (type === 'internal_approved') {
-        statusUpdate.status = 'internal_approved';
-      } else if (type === 'sent_to_client') {
-        statusUpdate.status = 'sent_to_client';
-      } else if (type === 'client_approved') {
-        statusUpdate.status = 'client_approved';
-      } else if (type === 'am_feedback') {
-        statusUpdate.status = 'internal_review';
-      } else if (type === 'accept_feedback') {
-        statusUpdate.status = 'internal_feedback';
-      } else if (type === 'reject_feedback') {
-        statusUpdate.status = 'internal_approved'; // Go back to previous state
-      } else if (type === 'rework_requested') {
-        statusUpdate.status = 'rework_requested';
-      } else if (type === 'approve_rework') {
-        statusUpdate.status = 'internal_feedback';
-      } else if (type === 'reject_rework') {
-        statusUpdate.status = 'client_approved'; // Go back to previous state
-      }
-      // Note: 'feedback_response', 'need_clarity' only add activity, don't change status
+  //     // Update task status based on comment type (some comments only add activity, don't change status)
+  //     if (type === 'brief_rework') {
+  //       statusUpdate.status = 'brief_rework';
+  //     } else if (type === 'client_feedback') {
+  //       statusUpdate.status = 'client_feedback';
+  //     } else if (type === 'internal_feedback') {
+  //       statusUpdate.status = 'internal_feedback';
+  //     } else if (type === 'onhold') {
+  //       statusUpdate.status = 'onhold';
+  //     } else if (type === 'reactivate') {
+  //       // Conditional reactivate: If task has assigned designer, go to designer_assigned, else go to brief_submitted
+  //       if (task.assignedDesigner) {
+  //         statusUpdate.status = 'designer_assigned'; // Designer can pick up again
+  //       } else {
+  //         statusUpdate.status = 'brief_submitted'; // Head/Lead can assign
+  //       }
+  //     } else if (type === 'brief_submitted') {
+  //       statusUpdate.status = 'brief_submitted';
+  //     } else if (type === 'picked_up') {
+  //       statusUpdate.status = 'picked_up';
+  //     } else if (type === 'draft_submitted') {
+  //       statusUpdate.status = 'draft_submitted';
+  //     } else if (type === 'internal_approved') {
+  //       statusUpdate.status = 'internal_approved';
+  //     } else if (type === 'sent_to_client') {
+  //       statusUpdate.status = 'sent_to_client';
+  //     } else if (type === 'client_approved') {
+  //       statusUpdate.status = 'client_approved';
+  //     } else if (type === 'am_feedback') {
+  //       statusUpdate.status = 'internal_review';
+  //     } else if (type === 'accept_feedback') {
+  //       statusUpdate.status = 'internal_feedback';
+  //     } else if (type === 'reject_feedback') {
+  //       statusUpdate.status = 'internal_approved'; // Go back to previous state
+  //     } else if (type === 'rework_requested') {
+  //       statusUpdate.status = 'rework_requested';
+  //     } else if (type === 'approve_rework') {
+  //       statusUpdate.status = 'internal_feedback';
+  //     } else if (type === 'reject_rework') {
+  //       statusUpdate.status = 'client_approved'; // Go back to previous state
+  //     }
+  //     // Note: 'feedback_response', 'need_clarity' only add activity, don't change status
 
-      // Handle workload reduction for completed tasks
-      if ((type === 'client_approved' || type === 'internal_approved') && task.assignedDesigner && task.starRate) {
-        try {
-          await this.userRepository.updateWorkload(task.assignedDesigner, {
-            $inc: { 
-              ongoingTasks: -1,
-              workloadScore: -task.starRate 
-            },
-            $pull: {
-              taskDifficulties: { taskId: taskId }
-            }
-          });
-        } catch (error) {
-          console.error('Error updating designer workload on completion:', error);
-        }
-      }
+  //     // Handle workload reduction for completed tasks
+  //     if ((type === 'client_approved' || type === 'internal_approved') && task.assignedDesigner && task.starRate) {
+  //       try {
+  //         await this.userRepository.updateWorkload(task.assignedDesigner, {
+  //           $inc: { 
+  //             ongoingTasks: -1,
+  //             workloadScore: -task.starRate 
+  //           },
+  //           $pull: {
+  //             taskDifficulties: { taskId: taskId }
+  //           }
+  //         });
+  //       } catch (error) {
+  //         console.error('Error updating designer workload on completion:', error);
+  //       }
+  //     }
 
-      // Update task with new comment and potentially new status
-      const updatedTask = await this.taskRepository.update(taskId, statusUpdate);
+  //     // Update task with new comment and potentially new status
+  //     const updatedTask = await this.taskRepository.update(taskId, statusUpdate);
 
-      // Send notifications for status change or comment
-      if (this.notificationService && updatedTask) {
-        try {
-          const project = await this.projectRepository.findById(updatedTask.projectId);
+  //     // Send notifications for status change or comment
+  //     if (this.notificationService && updatedTask) {
+  //       try {
+  //         const project = await this.projectRepository.findById(updatedTask.projectId);
           
-          // If status changed, notify about status change
-          if (statusUpdate.status && statusUpdate.status !== task.status) {
-            await this.notificationService.notifyStatusChange(
-              taskId,
-              updatedTask.taskName,
-              project?.projectName || 'Unknown Project',
-              task.status,
-              statusUpdate.status,
-              userId,
-              updatedTask.assignedDesigner || null,
-              updatedTask.designLead || null,
-              project?.assignedAM || null,
-              organizationId
-            );
-          }
+  //         // If status changed, notify about status change
+  //         if (statusUpdate.status && statusUpdate.status !== task.status) {
+  //           await this.notificationService.notifyStatusChange(
+  //             taskId,
+  //             updatedTask.taskName,
+  //             project?.projectName || 'Unknown Project',
+  //             task.status,
+  //             statusUpdate.status,
+  //             userId,
+  //             updatedTask.assignedDesigner || null,
+  //             updatedTask.designLead || null,
+  //             project?.assignedAM || null,
+  //             organizationId
+  //           );
+  //         }
           
-          // If comment was added (not just status change), notify about comment
-          if (comment && comment.trim()) {
-            await this.notificationService.notifyCommentAdded(
-              taskId,
-              updatedTask.taskName,
-              comment,
-              type,
-              userId,
-              updatedTask.assignedDesigner || null,
-              updatedTask.designLead || null,
-              project?.assignedAM || null,
-              organizationId
-            );
-          }
-        } catch (error) {
-          console.error('Error sending notifications:', error);
-        }
-      }
+  //         // If comment was added (not just status change), notify about comment
+  //         if (comment && comment.trim()) {
+  //           await this.notificationService.notifyCommentAdded(
+  //             taskId,
+  //             updatedTask.taskName,
+  //             comment,
+  //             type,
+  //             userId,
+  //             updatedTask.assignedDesigner || null,
+  //             updatedTask.designLead || null,
+  //             project?.assignedAM || null,
+  //             organizationId
+  //           );
+  //         }
+  //       } catch (error) {
+  //         console.error('Error sending notifications:', error);
+  //       }
+  //     }
 
-      res.json({
-        success: true,
-        data: updatedTask,
-        message: 'Comment added successfully'
-      });
+  //     res.json({
+  //       success: true,
+  //       data: updatedTask,
+  //       message: 'Comment added successfully'
+  //     });
 
-    } catch (error) {
-      console.error('Error adding comment:', error);
-      res.status(500).json({
+  //   } catch (error) {
+  //     console.error('Error adding comment:', error);
+  //     res.status(500).json({
+  //       success: false,
+  //       error: 'Internal server error'
+  //     });
+  //   }
+  // };
+  // Add comment to task
+addComment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { taskId } = req.params;
+    const { comment, type, asset } = req.body; // Add asset to destructuring
+    const organizationId = (req as any).admin?.organizationId || (req as any).user?.organizationId;
+    const userId = (req as any).admin?.adminId || (req as any).user?.userId;
+
+    if (!organizationId || !userId) {
+      res.status(400).json({
         success: false,
-        error: 'Internal server error'
+        error: 'Authentication required'
       });
+      return;
     }
-  };
+
+    // Allow either comment or asset (or both)
+    if (!comment?.trim() && !asset) {
+      res.status(400).json({
+        success: false,
+        error: 'Comment text or image is required'
+      });
+      return;
+    }
+
+    if (!type?.trim()) {
+      res.status(400).json({
+        success: false,
+        error: 'Comment type is required'
+      });
+      return;
+    }
+
+    // Find task
+    const task = await this.taskRepository.findById(taskId);
+    if (!task || task.organizationId !== organizationId) {
+      res.status(404).json({
+        success: false,
+        error: 'Task not found'
+      });
+      return;
+    }
+
+    // Map comment types to allowed enum values
+    const typeMapping: { [key: string]: string } = {
+      'client_feedback': 'client_feedback',
+      'internal_feedback': 'internal_feedback',
+      'brief_rework': 'brief_rework',
+      'design_rework': 'design_rework',
+      'designer_feedback': 'designer_feedback',
+      'rework_requested': 'rework_requested',
+      'brief_submitted': 'brief_submitted',
+      'onhold': 'onhold',
+      'reactivate': 'reactivate',
+      'need_clarity': 'need_clarity',
+      'clarification': 'clarification',
+      'designer_assigned': 'designer_assigned',
+      'picked_up': 'picked_up',
+      'draft_submitted': 'draft_submitted',
+      'am_feedback': 'am_feedback',
+      'feedback_response': 'feedback_response',
+      'internal_approved': 'internal_approved',
+      'sent_to_client': 'sent_to_client',
+      'client_approved': 'client_approved',
+      'internal_review': 'internal_review',
+      'accept_feedback': 'accept_feedback',
+      'reject_feedback': 'reject_feedback',
+      'approve_rework': 'approve_rework',
+      'reject_rework': 'reject_rework'
+    };
+
+    // Create comment activity with optional asset
+    const newActivity: ActivityComment = {
+      byWho: userId,
+      comment: comment?.trim() || '', // Empty string if no comment text
+      time: new Date(),
+      type: (typeMapping[type] || 'internal_feedback') as any,
+      asset: asset || undefined // Add optional asset field
+    };
+
+    // Determine if status should be updated based on comment type
+    let statusUpdate: any = {
+      activityAndComments: [...(task.activityAndComments || []), newActivity],
+      updatedAt: new Date()
+    };
+
+    // Update task status based on comment type (some comments only add activity, don't change status)
+    if (type === 'brief_rework') {
+      statusUpdate.status = 'brief_rework';
+    } else if (type === 'client_feedback') {
+      statusUpdate.status = 'client_feedback';
+    } else if (type === 'internal_feedback') {
+      statusUpdate.status = 'internal_feedback';
+    } else if (type === 'onhold') {
+      statusUpdate.status = 'onhold';
+    } else if (type === 'reactivate') {
+      // Conditional reactivate: If task has assigned designer, go to designer_assigned, else go to brief_submitted
+      if (task.assignedDesigner) {
+        statusUpdate.status = 'designer_assigned'; // Designer can pick up again
+      } else {
+        statusUpdate.status = 'brief_submitted'; // Head/Lead can assign
+      }
+    } else if (type === 'brief_submitted') {
+      statusUpdate.status = 'brief_submitted';
+    } else if (type === 'picked_up') {
+      statusUpdate.status = 'picked_up';
+    } else if (type === 'draft_submitted') {
+      statusUpdate.status = 'draft_submitted';
+    } else if (type === 'internal_approved') {
+      statusUpdate.status = 'internal_approved';
+    } else if (type === 'sent_to_client') {
+      statusUpdate.status = 'sent_to_client';
+    } else if (type === 'client_approved') {
+      statusUpdate.status = 'client_approved';
+    } else if (type === 'am_feedback') {
+      statusUpdate.status = 'internal_review';
+    } else if (type === 'accept_feedback') {
+      statusUpdate.status = 'internal_feedback';
+    } else if (type === 'reject_feedback') {
+      statusUpdate.status = 'internal_approved'; // Go back to previous state
+    } else if (type === 'rework_requested') {
+      statusUpdate.status = 'rework_requested';
+    } else if (type === 'approve_rework') {
+      statusUpdate.status = 'internal_feedback';
+    } else if (type === 'reject_rework') {
+      statusUpdate.status = 'client_approved'; // Go back to previous state
+    }
+    // Note: 'feedback_response', 'need_clarity' only add activity, don't change status
+
+    // Handle workload reduction for completed tasks
+    if ((type === 'client_approved' || type === 'internal_approved') && task.assignedDesigner && task.starRate) {
+      try {
+        await this.userRepository.updateWorkload(task.assignedDesigner, {
+          $inc: { 
+            ongoingTasks: -1,
+            workloadScore: -task.starRate 
+          },
+          $pull: {
+            taskDifficulties: { taskId: taskId }
+          }
+        });
+      } catch (error) {
+        console.error('Error updating designer workload on completion:', error);
+      }
+    }
+    
+    // Update task with new comment and potentially new status
+    const updatedTask = await this.taskRepository.update(taskId, statusUpdate);
+
+    // Send notifications for status change or comment
+    if (this.notificationService && updatedTask) {
+      try {
+        const project = await this.projectRepository.findById(updatedTask.projectId);
+        
+        // If status changed, notify about status change
+        if (statusUpdate.status && statusUpdate.status !== task.status) {
+          await this.notificationService.notifyStatusChange(
+            taskId,
+            updatedTask.taskName,
+            project?.projectName || 'Unknown Project',
+            task.status,
+            statusUpdate.status,
+            userId,
+            updatedTask.assignedDesigner || null,
+            updatedTask.designLead || null,
+            project?.assignedAM || null,
+            organizationId
+          );
+        }
+        
+        // If comment was added (not just status change), notify about comment
+        if (comment?.trim()) { // Only notify if there's actual comment text
+          await this.notificationService.notifyCommentAdded(
+            taskId,
+            updatedTask.taskName,
+            comment,
+            type,
+            userId,
+            updatedTask.assignedDesigner || null,
+            updatedTask.designLead || null,
+            project?.assignedAM || null,
+            organizationId
+          );
+        }
+      } catch (error) {
+        console.error('Error sending notifications:', error);
+      }
+    }
+
+    res.json({
+      success: true,
+      data: updatedTask,
+      message: 'Comment added successfully'
+    });
+
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+};
 
   // Update task status with time tracking
   updateTaskStatus = async (req: Request, res: Response): Promise<void> => {

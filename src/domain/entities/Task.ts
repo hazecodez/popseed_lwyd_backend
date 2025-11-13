@@ -10,6 +10,7 @@ export interface ActivityComment {
   comment: string;
   time: Date;
   type: 'brief_submitted' | 'brief_rework' | 'design_rework' | 'designer_feedback' | 'client_feedback' | 'internal_feedback' | 'rework_requested' | 'designer_assigned' | 'designer_changed' | 'clarification';
+  asset?: string; // Optional: Cloudinary image URL
 }
 
 export interface Deliverable {

@@ -13,6 +13,7 @@ interface ActivityComment {
   comment: string;
   time: Date;
   type: 'brief_submitted' | 'brief_rework' | 'design_rework' | 'designer_feedback' | 'client_feedback' | 'internal_feedback' | 'rework_requested' | 'designer_assigned' | 'designer_changed';
+  asset?: string;
 }
 
 export interface ITaskDocument extends Document {
@@ -106,6 +107,11 @@ const ActivityCommentSchema = new Schema({
     type: String,
     required: true,
     enum: ['brief_submitted', 'brief_rework', 'design_rework', 'designer_feedback', 'client_feedback', 'internal_feedback', 'rework_requested', 'designer_assigned', 'designer_changed', 'clarification']
+  },
+  asset: {
+    type: String,
+    trim: true,
+    required: false,
   }
 }, { _id: false });
 
