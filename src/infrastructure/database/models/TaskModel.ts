@@ -2,7 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 
 interface StatusChange {
-  status: 'brief_submitted' | 'rework_requested' | 'designer_assigned' | 'picked_up' | 'draft_submitted' | 'internal_approved' | 'sent_to_client' | 'client_approved' | 'client_feedback';
+  status: 'brief_submitted' | 'rework_requested' | 'designer_assigned' | 'picked_up' | 'draft_submitted' | 'hold_by_designer' | 'internal_approved' | 'sent_to_client' | 'client_approved' | 'client_feedback';
   changedAt: Date;
   changedBy: string;
   notes?: string;
@@ -12,7 +12,7 @@ interface ActivityComment {
   byWho: string;
   comment: string;
   time: Date;
-  type: 'brief_submitted' | 'brief_rework' | 'design_rework' | 'designer_feedback' | 'client_feedback' | 'internal_feedback' | 'rework_requested' | 'designer_assigned' | 'designer_changed';
+  type: 'brief_submitted' | 'brief_rework' | 'design_rework' | 'designer_feedback' | 'client_feedback' | 'internal_feedback' | 'rework_requested' | 'designer_assigned' | 'designer_changed' | 'more_info_request' | 'more_info_response' | 'hold_by_designer';
   asset?: string;
 }
 
@@ -32,7 +32,7 @@ export interface ITaskDocument extends Document {
   createdBy: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
   starRate?: number;
-  status: 'brief_submitted' | 'rework_requested' | 'designer_assigned' | 'picked_up' | 'draft_submitted' | 'internal_approved' | 'sent_to_client' | 'client_approved' | 'client_feedback';
+  status: 'brief_submitted' | 'rework_requested' | 'designer_assigned' | 'picked_up' | 'draft_submitted' | 'internal_approved' | 'sent_to_client' | 'client_approved' | 'client_feedback' | 'hold_by_designer';
   statusHistory: StatusChange[];
   dueDate: Date;
   dueTime?: string;
@@ -69,7 +69,7 @@ const StatusChangeSchema = new Schema({
   status: {
     type: String,
     required: true,
-    enum: ['brief_submitted', 'rework_requested', 'designer_assigned', 'picked_up', 'draft_submitted', 'internal_approved', 'sent_to_client', 'client_approved', 'client_feedback']
+    enum: ['brief_submitted', 'rework_requested', 'designer_assigned', 'picked_up', 'draft_submitted', 'internal_approved', 'sent_to_client', 'client_approved', 'client_feedback', 'hold_by_designer']
   },
   changedAt: {
     type: Date,
@@ -106,7 +106,7 @@ const ActivityCommentSchema = new Schema({
   type: {
     type: String,
     required: true,
-    enum: ['brief_submitted', 'brief_rework', 'design_rework', 'designer_feedback', 'client_feedback', 'internal_feedback', 'rework_requested', 'designer_assigned', 'designer_changed', 'clarification']
+    enum: ['brief_submitted', 'brief_rework', 'design_rework', 'designer_feedback', 'client_feedback', 'internal_feedback', 'rework_requested', 'designer_assigned', 'designer_changed', 'more_info_response', 'more_info_request', 'hold_by_designer']
   },
   asset: {
     type: String,
@@ -194,7 +194,7 @@ const TaskSchema = new Schema({
   status: {
     type: String,
     required: true,
-    enum: ['brief_submitted', 'rework_requested', 'designer_assigned', 'picked_up', 'draft_submitted', 'internal_approved', 'sent_to_client', 'client_approved', 'client_feedback'],
+    enum: ['brief_submitted', 'rework_requested', 'designer_assigned', 'picked_up', 'draft_submitted', 'internal_approved', 'sent_to_client', 'client_approved', 'client_feedback', 'hold_by_designer'],
     default: 'brief_submitted',
     index: true
   },

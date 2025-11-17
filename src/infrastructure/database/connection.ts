@@ -20,6 +20,8 @@ export class DatabaseConnection {
       // Configure connection options based on whether it's local or Atlas
       const connectionOptions: any = {
         dbName: config.database.dbName,
+        retryWrites: true,
+  retryReads: true,
       };
 
       // If it's a local MongoDB connection, don't use SSL

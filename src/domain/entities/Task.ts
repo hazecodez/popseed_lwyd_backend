@@ -1,5 +1,5 @@
 export interface StatusChange {
-  status: 'brief_submitted' | 'rework_requested' | 'designer_assigned' | 'picked_up' | 'draft_submitted' | 'internal_approved' | 'sent_to_client' | 'client_approved' | 'client_feedback';
+  status: 'brief_submitted' | 'rework_requested' | 'designer_assigned' | 'picked_up' | 'hold_by_designer' | 'draft_submitted' | 'internal_approved' | 'sent_to_client' | 'client_approved' | 'client_feedback';
   changedAt: Date;
   changedBy: string; // User ID
   notes?: string;
@@ -9,7 +9,7 @@ export interface ActivityComment {
   byWho: string; // User ID
   comment: string;
   time: Date;
-  type: 'brief_submitted' | 'brief_rework' | 'design_rework' | 'designer_feedback' | 'client_feedback' | 'internal_feedback' | 'rework_requested' | 'designer_assigned' | 'designer_changed' | 'clarification';
+  type: 'brief_submitted' | 'brief_rework' | 'design_rework' | 'designer_feedback' | 'client_feedback' | 'internal_feedback' | 'rework_requested' | 'designer_assigned' | 'designer_changed' | 'more_info_response' | 'more_info_request' | 'hold_by_designer';
   asset?: string; // Optional: Cloudinary image URL
 }
 
@@ -35,7 +35,7 @@ export interface Task {
   createdBy: string; // User ID - who created the task (AM)
   priority: 'low' | 'medium' | 'high' | 'urgent';
   starRate?: number; // 0-5 star difficulty rating assigned by Lead
-  status: 'brief_submitted' | 'rework_requested' | 'designer_assigned' | 'picked_up' | 'draft_submitted' | 'internal_approved' | 'sent_to_client' | 'client_approved' | 'client_feedback';
+  status: 'brief_submitted' | 'rework_requested' | 'designer_assigned' | 'picked_up' | 'draft_submitted' | 'internal_approved' | 'sent_to_client' | 'client_approved' | 'client_feedback' | 'hold_by_designer';
   statusHistory: StatusChange[]; // Time tracking of status changes
   dueDate: Date;
   dueTime?: string; // Time in HH:MM format (e.g., "14:30")
