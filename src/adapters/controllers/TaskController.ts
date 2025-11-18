@@ -106,6 +106,65 @@ export class TaskController {
     }
   };
 
+  // Get tasks for a specific user by ID (used for viewing team member's tasks in sidebar)
+getUserTasksById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const organizationId = (req as any).admin?.organizationId || (req as any).user?.organizationId;
+    const userIdToQuery = req.params.userId; // Get userId from URL parameter
+
+    if (!organizationId || !userIdToQuery) {
+      res.status(400).json({
+        success: false,
+        error: 'Organization ID and User ID are required'
+      });
+      return;
+    }
+
+    // Find all tasks where this user is in designers array or is the designLead
+    const taskQuery = {
+      organizationId,
+      $or: [
+        { designers: userIdToQuery },
+        { designLead: userIdToQuery }
+      ]
+    };
+
+    const userTasks = await this.taskRepository.findByFilters(taskQuery);
+
+    // Populate project details for each task
+    const tasksWithProjects = await Promise.all(
+      userTasks.map(async (task) => {
+        const project = await this.projectRepository.findById(task.projectId);
+        return {
+          ...task,
+          project: project ? {
+            projectId: project.projectId,
+            projectName: project.projectName,
+            clientId: project.clientId
+          } : null
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      data: tasksWithProjects,
+      message: 'User tasks retrieved successfully',
+      meta: {
+        total: tasksWithProjects.length,
+        userId: userIdToQuery
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching user tasks:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+};
+
   // Get unassigned tasks (for Design Head/Lead filters)
   getUnassignedTasks = async (req: Request, res: Response): Promise<void> => {
     try {

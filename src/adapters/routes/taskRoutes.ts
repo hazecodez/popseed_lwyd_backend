@@ -27,6 +27,7 @@ export function createTaskRoutes(
   // User-specific task routes (for individual task management)
   router.get('/user', userAuthMiddleware, taskController.getUserTasks);
   router.get('/user/assigned', userAuthMiddleware, taskController.getAssignedTasks);
+  router.get('/user/:userId/tasks', userAuthMiddleware, taskController.getUserTasksById);
   router.get('/user/unassigned', userAuthMiddleware, taskController.getUnassignedTasks);
   router.post('/user', userAuthMiddleware, taskController.createTask);
 
