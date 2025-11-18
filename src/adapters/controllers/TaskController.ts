@@ -34,28 +34,29 @@ export class TaskController {
       const isDesignHead = userRole?.toLowerCase().includes('design head') || userRole?.toLowerCase().includes('design_head');
       const isDesignLead = userRole?.toLowerCase().includes('design lead') || userRole?.toLowerCase().includes('design_lead');
 
-      if (isDesignHead) {
+      if (isDesignHead || isDesignLead) {
         // Design Head sees ALL tasks in organization
         taskQuery = {
           organizationId
         };
-      } else if (isDesignLead) {
-        // Design Leads see:
-        // 1. Unassigned tasks (status = brief_submitted)
-        // 2. Tasks where they are assigned lead
-        // 3. Tasks where they are assigned designer
-        taskQuery = {
-          organizationId,
-          $or: [
-            // Tasks assigned to them as lead
-            { designLead: userId },
-            // Tasks assigned to them as designer
-            { assignedDesigner: userId },
-            // All unassigned design tasks (no assignedDesigner set)
-            { assignedDesigner: { $exists: false } },
-            { assignedDesigner: null }
-          ]
-        };
+      // } 
+      // else if (isDesignLead) {
+      //   // Design Leads see:
+      //   // 1. Unassigned tasks (status = brief_submitted)
+      //   // 2. Tasks where they are assigned lead
+      //   // 3. Tasks where they are assigned designer
+      //   taskQuery = {
+      //     organizationId,
+      //     $or: [
+      //       // Tasks assigned to them as lead
+      //       { designLead: userId },
+      //       // Tasks assigned to them as designer
+      //       { assignedDesigner: userId },
+      //       // All unassigned design tasks (no assignedDesigner set)
+      //       { assignedDesigner: { $exists: false } },
+      //       { assignedDesigner: null }
+      //     ]
+      //   };
       } else {
         // Regular users only see tasks assigned to them
         taskQuery = {
