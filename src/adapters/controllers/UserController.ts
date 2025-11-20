@@ -756,7 +756,7 @@ export class UserController {
         const activeTasks = await TaskModel.find({
           organizationId,
           assignedDesigner: u.userId,
-          status: { $ne: 'client_approved' },
+          status: { $nin: ['draft_submitted', 'internal_approved', 'sent_to_client', 'client_approved'] },  // ← Match frontend
           taskType: { $in: designTaskTypes }
         });
         
