@@ -1216,7 +1216,8 @@ addComment = async (req: Request, res: Response): Promise<void> => {
       'accept_feedback': 'accept_feedback',
       'reject_feedback': 'reject_feedback',
       'approve_rework': 'approve_rework',
-      'reject_rework': 'reject_rework'
+      'reject_rework': 'reject_rework',
+      'internal_discussion': 'internal_discussion'
     };
 
     // Create comment activity with optional asset

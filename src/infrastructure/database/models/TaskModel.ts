@@ -12,7 +12,7 @@ interface ActivityComment {
   byWho: string;
   comment: string;
   time: Date;
-  type: 'brief_submitted' | 'brief_rework' | 'design_rework' | 'designer_feedback' | 'client_feedback' | 'internal_feedback' | 'rework_requested' | 'designer_assigned' | 'designer_changed' | 'more_info_request' | 'more_info_response' | 'hold_by_designer';
+  type: 'brief_submitted' | 'brief_rework' | 'design_rework' | 'designer_feedback' | 'client_feedback' | 'internal_feedback' | 'rework_requested' | 'designer_assigned' | 'designer_changed' | 'internal_discussion' | 'hold_by_designer';
   asset?: string;
 }
 
@@ -106,7 +106,7 @@ const ActivityCommentSchema = new Schema({
   type: {
     type: String,
     required: true,
-    enum: ['brief_submitted', 'brief_rework', 'design_rework', 'designer_feedback', 'client_feedback', 'internal_feedback', 'rework_requested', 'designer_assigned', 'designer_changed', 'more_info_response', 'more_info_request', 'hold_by_designer']
+    enum: ['brief_submitted', 'brief_rework', 'design_rework', 'designer_feedback', 'client_feedback', 'internal_feedback', 'rework_requested', 'designer_assigned', 'designer_changed', 'internal_discussion', 'hold_by_designer']
   },
   asset: {
     type: String,
